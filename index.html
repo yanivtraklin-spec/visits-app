@@ -67,7 +67,7 @@ document.getElementById("screen").innerHTML=`
 ${state.customers.map(c=>`
 <div style="margin-top:10px">
 <b>${c.name}</b><br>
-${c.city} • ${c.phone}
+${c.city} • ${c.phone}<button onclick="deleteCustomer(${c.id})">🗑️</button>
 </div>
 `).join("")}
 </div>`;
@@ -121,7 +121,11 @@ let notes=document.getElementById("notes").value;
 state.visits.unshift({name:c.name,amount,notes});
 setTab("visits");
 }
-
+  
+function deleteCustomer(id){
+  state.customers = state.customers.filter(c => c.id !== id);
+  render();
+}
 function resetAll(){
 if(confirm("לאפס הכל?")){
 localStorage.removeItem("visits_app");
