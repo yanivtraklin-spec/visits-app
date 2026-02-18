@@ -67,7 +67,8 @@ document.getElementById("screen").innerHTML=`
 ${state.customers.map(c=>`
 <div style="margin-top:10px">
 <b>${c.name}</b><br>
-${c.city} • ${c.phone}<button onclick="deleteCustomer(${c.id})">🗑️</button>
+${c.city} • ${c.phone}
+</div>
 </div>
 `).join("")}
 </div>`;
