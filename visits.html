@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ביקורים לסוכן מכירות</title>
+
+<style>
+body{font-family:Arial;background:#f6f7fb;margin:0;padding:14px;padding-bottom:90px}
+.top{display:flex;justify-content:space-between;align-items:center}
+.title{font-weight:900;font-size:18px}
+.card{background:#fff;border-radius:16px;padding:12px;margin-top:12px}
+button{padding:10px;border-radius:12px;border:1px solid #ddd;background:#fff;font-weight:900}
+.primary{width:100%;background:#111;color:#fff}
+.nav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #eee;display:flex;padding:10px}
+.nav button{flex:1;margin:0 4px}
+.active{background:#111;color:#fff}
+input,select,textarea{width:100%;padding:10px;border-radius:12px;border:1px solid #ddd;margin-top:6px}
+</style>
+</head>
+
+<body>
+
+<div class="top">
+<div class="title">ביקורים לסוכן מכירות</div>
+<button onclick="resetAll()">איפוס</button>
+</div>
+
+<div id="screen"></div>
+
+<div class="nav">
+<button id="tabCustomers" onclick="setTab('customers')">לקוחות</button>
+<button id="tabAdd" onclick="setTab('add')">ביקור חדש</button>
+<button id="tabVisits" onclick="setTab('visits')">היסטוריה</button>
+</div>
+
+<script>
+
+let state = JSON.parse(localStorage.getItem("visits_app")) || {
+customers: [
+{id:"1",name:"KSP – חיפה",city:"חיפה",phone:"04-0000000"},
+{id:"2",name:"חשמל בסט – נצרת",city:"נצרת",phone:"04-0000001"}
+],
+visits:[]
+};
+
+let selectedCustomerId = state.customers[0]?.id || "";
+let tab="customers";
+
+function save(){localStorage.setItem("visits_app",JSON.stringify(state));}
+
+function setTab(t){
+tab=t;
+document.getElementById("tabCustomers").classList.remove("active");
+document.getElementById("tabAdd").classList.remove("active");
+document.getElementById("tabVisits").classList.remove("active");
+document.getElementById("tab"+t.charAt(0).toUpperCase()+t.slice(1)).classList.add("active");
+render();
+}
+
+function render(){
+
+if(tab==="customers"){
+document.getElementById("screen").innerHTML=`
+<div class="card">
+<button onclick="addCustomer()">+ הוסף לקוח</button>
+${state.customers.map(c=>`
+<div style="margin-top:10px">
+<b>${c.name}</b><br>
+${c.city} • ${c.phone}
+</div>
+`).join("")}
+</div>`;
+}
+
+if(tab==="add"){
+let c=state.customers.find(x=>x.id===selectedCustomerId);
+document.getElementById("screen").innerHTML=`
+<div class="card">
+<select onchange="selectedCustomerId=this.value">
+${state.customers.map(c=>`
+<option value="${c.id}" ${c.id===selectedCustomerId?"selected":""}>${c.name}</option>
+`).join("")}
+</select>
+<input id="amount" placeholder="סכום"/>
+<textarea id="notes" placeholder="הערות"></textarea>
+<button class="primary" onclick="addVisit()">שמור ביקור</button>
+</div>`;
+}
+
+if(tab==="visits"){
+document.getElementById("screen").innerHTML=`
+<div class="card">
+${state.visits.length===0?"אין ביקורים":
+state.visits.map(v=>`
+<div style="margin-top:10px">
+<b>${v.name}</b> – ₪${v.amount}<br>
+${v.notes}
+</div>
+`).join("")}
+</div>`;
+}
+
+save();
+}
+
+function addCustomer(){
+let name=prompt("שם לקוח");
+if(!name)return;
+let city=prompt("עיר");
+let phone=prompt("טלפון");
+state.customers.push({id:Date.now().toString(),name,city,phone});
+selectedCustomerId=state.customers[state.customers.length-1].id;
+render();
+}
+
+function addVisit(){
+let c=state.customers.find(x=>x.id===selectedCustomerId);
+let amount=document.getElementById("amount").value;
+let notes=document.getElementById("notes").value;
+state.visits.unshift({name:c.name,amount,notes});
+setTab("visits");
+}
+
+function resetAll(){
+if(confirm("לאפס הכל?")){
+localStorage.removeItem("visits_app");
+location.reload();
+}
+}
+
+setTab("customers");
+
+</script>
+</body>
+</html>
